@@ -8,31 +8,7 @@ servers:
   - url: https://api.acamica.com.ar/v1
 
 paths:
-  /user/login:
-    post:
-      tags:
-      - Users
-      summary: Logins user and returns JWT if successful
-      security: []
-      requestBody:
-        required: true
-        content:
-          aplication/json:
-            schema:
-              $ref: '#/components/schemas/LoginBody'
-      responses:
-        '200':
-          description: Ok. JSON object with id.
-          content:
-            aplication/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-        '401':
-          description: Bad credentials.
-          
+ 
   /user:  
     post:
       tags:
@@ -109,7 +85,6 @@ paths:
       responses:
         '200':
           description: User deleted
-          
   /user/{id}/orders:
     get:
       tags:
@@ -487,15 +462,6 @@ components:
         admin:
           type: boolean
     
-    LoginBody:
-      type: object
-      properties:
-        username:
-          type: string
-          example: johnnybgood
-        password:
-          type: string
-          example: eASyPassWOrd
     Order:
       type: object
       properties:
@@ -583,15 +549,4 @@ components:
           example: https://images.com/filet_mignon.png
         price:
           $ref: '#/components/schemas/Currency'
-          
-  securitySchemes:
-    bearerAuth:            # arbitrary name for the security scheme
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      
-security:
-  - bearerAuth:
-    - user
-    - admin
                       
