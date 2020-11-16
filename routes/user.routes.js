@@ -1,56 +1,76 @@
-const userService = require('../services/user.service.js')
+const userService = require('../services/user.service.js');
+const userMiddlewares = require('../middlewares/user.middlewares.js');
 
 module.exports = (app) => {
   //Login username and password. Return JWT token if success.
-  app.post('/user/login', (req, res) => {
-      const {username,password} = req.body;
+  app.post('/user/login', async (req, res) => {
+    const { username, password } = req.body;
 
-      const token = userService.getToken(username,password);
+    const token = await userService.signIn(username, password);
 
-      if(token){
-        res.status(200).json(token);
-        
-      }
-      else{
-        res.status(400).json({ error: 'Bad credentials' });
-      }
+    if (token) {
+      res.status(200).json({token});
+    }
+    else {
+      res.status(400).json({ error: 'Bad credentials' });
+    }
   })
 
-  app.
+  app.post('/user', async (req, res) => {
+    try {
+      const user = await userService.create(req.body);
+      if (user)
+        res.status(201).json(user);
+      else
+        throw new Error('User could not be created');
+    }
+    catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  });
 
+  app.get('/user', async (req, res) => {
+    try{
+      const token = req.headers.authorization.split(' ')[1];
+      const user= userService.getUserByToken(token);
+      if(user)
+        res.status(200).json(user);
+      else
+        throw new Error("User not found");
+    }
+    catch (error){
+      res.status(404).json({error: error.message});
+    }
+  })
 
-    // ruta de creacion de todos
-    app.post('/todosPromesa', (req, res) => {
+  app.get('/user/:id', userMiddlewares.hasAccessToId, async (req, res) => {
+    const user = await userService.getUserById(req.params.id);
+    
+    if(user){
+      res.status(200).json(user);
+    }
+    else{
+      console.error('User not found').
+      res.status(404);
+    }
+  })
 
-        todosService.create(req.body).then(newTodo => {
-            res.status(201).json(newTodo);
-        }).catch(error => {
-            res.status(500).json({ error: error.message });
-        })
-    })
+  app.put('/user/:id', userMiddlewares.hasAccessToId, async (req, res) => {
+    const user = await userService.getUserById(req.params.id);
+    
+    if(user){
+      try{
+        await userService.updateUser(user.id,req.body);
+        res.send(200).send('User updated');
+      }
+      catch(error){
+        res.send(404).send('Could not udpate user. '+error.message);
+      }
+    }
+    else{
+      console.error('No user found').
+      res.send(404);
+    }
+  })
 
-
-    app.get('/todos', (req, res) => {
-
-        todosService.listAll().then(todos => {
-            res.status(200).json(todos)
-        }).catch(err => {
-            res.status(500).json({ error: err.message })
-        })
-    })
-
-    app.get('/todos/:todoId', async (req, res) => {
-        const id  = req.params.todoId
-        try {
-            const todo = await todosService.findById(id);
-            res.status(200).json(todo);
-        } catch (error) {
-            if(error.kind == 'ObjectId') {
-                res.status(404).json({ error: "no existe ese id" });
-            }
-            else {
-                res.status(500).json({ error: "intente en un rato" });
-            }
-        }
-    })
 }
