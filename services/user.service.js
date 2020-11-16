@@ -71,7 +71,7 @@ exports.create = async (userObj) => {
 		throw new Error('Missing phone or invalid');
 
 	_users.push({
-		id: _lastId++,
+		id: ++_lastId,
 		username,
 		email,
 		password,
