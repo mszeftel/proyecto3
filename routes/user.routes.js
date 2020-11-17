@@ -43,8 +43,8 @@ module.exports = (app) => {
     }
   })
 
-  app.get('/user/:id', userMiddlewares.hasAccessToId, async (req, res) => {
-    const user = await userService.getUserById(req.params.id);
+  app.get('/user/:userId', userMiddlewares.hasAccessToUser, async (req, res) => {
+    const user = await userService.getUserById(req.params.userId);
     
     if(user){
       res.status(200).json(user);
@@ -55,12 +55,12 @@ module.exports = (app) => {
     }
   })
 
-  app.put('/user/:id', userMiddlewares.hasAccessToId, async (req, res) => {
-    const user = await userService.getUserById(req.params.id);
+  app.put('/user/:userId', userMiddlewares.hasAccessToUser, async (req, res) => {
+    const user = await userService.getUserById(req.params.userId);
     
     if(user){
       try{
-        await userService.updateUser(user.id,req.body);
+        await userService.update(user.id,req.body);
         res.send(200).send('User updated');
       }
       catch(error){
@@ -73,4 +73,15 @@ module.exports = (app) => {
     }
   })
 
+  app.get('/user/:userId/orders', userMiddlewares.hasAccessToUser, async (req, res) => {
+    const orders = await userService.getUserOrders(req.params.userId);
+    
+    if(orders){
+      res.status(200).json(onvrdisplaypointerunrestricted);
+    }
+    else{
+      console.error('User not found').
+      res.status(404);
+    }
+  })
 }
