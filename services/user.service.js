@@ -1,27 +1,22 @@
-const config = require('../config/config.js')
+const config = require('../config/config')
 const jwt = require('jsonwebtoken');
+const Sequelize = require('sequelize');
+const initModels = require('../models/init-models');
 
-const _users = [
-	{
-		id: 1,
-		username: 'admin',
-		password: 'admin1234',
-		email: 'mszeftel@gmail.com',
-		admin: true
-	},
-	{
-		id: 2,
-		username: 'mati',
-		password: 'mati1234',
-		email: 'mszeftel@gmail.com',
-		admin: false
-	}
-]
-let _lastId = 2;
 
-function findByUsername(username) {
-	const user = _users.find(usr => usr.username == username);
+const sequelize = new Sequelize(`${config.DB_DIALECT}://${config.DB_USER}:${config.DB_PASS}@${config.DB_HOST}:${config.DB_PORT}/${config.DB_DATABASE}`);
+
+const { OrderItems, Orders, Products, Users } = initModels(sequelize);
+
+async function findByUsername(username) {
+	const user = await Users.findOne({raw:true,
+		where:{
+			username: username
+		}
+	});
+
 	if (user) user.password = undefined;
+
 	return user;
 }
 
@@ -29,10 +24,10 @@ function usernameExists(username) {
 	return (findByUsername(username)) ? true : false;
 }
 
-function validateUserObj(userObj) {
-	const { username, email, password, name, lastName, address, phone } = userObj;
+async function validateUserObj(userObj) {
+	const { username, email, password, name, lastname, address, phone } = userObj;
 
-	if (!username || username == '' || findByUsername(username))
+	if (!username || username == '' || await findByUsername(username))
 		throw new Error('Missing username or invalid');
 	else if (!email || email == '')
 		throw new Error('Missing email or invalid');
@@ -40,7 +35,7 @@ function validateUserObj(userObj) {
 		throw new Error('Missing passord or invalid');
 	else if (!name || name == '')
 		throw new Error('Missing name or invalid');
-	else if (!lastName || lastName == '')
+	else if (!lastname || lastname == '')
 		throw new Error('Missing last name or invalid');
 	else if (!address || address == '')
 		throw new Error('Missing address or invalid');
@@ -53,7 +48,12 @@ function validateUserObj(userObj) {
 
 async function signIn(username, password) {
 	//Check credentials
-	const user = _users.find(usr => usr.username == username && usr.password == password);
+	const user = await Users.findOne({
+		where:{
+			username: username,
+			password: password
+		}
+	});
 
 	if (user) {
 		const token = jwt.sign({
@@ -74,43 +74,23 @@ async function signIn(username, password) {
 
 async function create(userObj) {
 
-	const { username, email, password, name, lastName, address, phone } = userObj;
+	const { username, email, password, name, lastname, address, phone } = userObj;
 
 	try {
-		validateUserObj(userObj);
+		await validateUserObj(userObj);
 
-		_users.push({
-			id: ++_lastId,
-			username,
-			email,
-			password,
-			name,
-			lastName,
-			phone,
-			address,
-			admin: false
-		})
+		const user = await Users.create({username,email,name,lastname,address,phone,password,admin:false});
+		user.password=undefined;
 
-		return {
-			id: _lastId,
-			username,
-			email,
-			name,
-			lastName,
-			phone,
-			address,
-			admin: false
-		}
-
+		return user;
 	}
 	catch (error) {
 		throw (error);
 	}
 }
 
-async function update(id,userObj) {
-
-	const {email, password, name, lastName, address, phone } = userObj;
+async function update(id, userObj) {
+	const { email, password, name, lastName, address, phone } = userObj;
 	const oldUser = getUserById(id);
 
 	try {
@@ -135,19 +115,44 @@ async function update(id,userObj) {
 	}
 }
 
-function getUserById(id) {
-	const user = _users.find(usr => usr.id == id);
-	if (user) user.password = undefined;
+async function getUserById(id) {
+	const user = await Users.findOne( {raw: true,
+		where:{
+			id: id
+		}
+	});
+
+	if(user) user.password=undefined;
+
+	return user;
+
+	//console.log('getuserById',user);
+}
+
+async function getUserByToken(token) {
+	const decodedUser = jwt.verify(token, config.JWT_KEY);
+	const user = await getUserById(decodedUser.id);
+
 	return user;
 }
 
-function getUserByToken(token) {
-	const decodedUser = jwt.verify(token, config.JWT_KEY);
-	const user = getUserById(decodedUser.id);
-	if (user) user.password = undefined;
-	return user;
+async function getUserOrders(userId){
+	try{
+		const orders = await Orders.findAll({raw: true,nest: true, include: OrderItems,
+			where:{
+				user_id: userId
+			}
+		})
+
+		return orders;
+	}catch(err){
+		console.error(err);
+	}
+
+
+
 }
 
 module.exports = {
-	getUserById, getUserByToken, signIn, create, update
+	getUserById, getUserByToken, signIn, create, update, getUserOrders
 }

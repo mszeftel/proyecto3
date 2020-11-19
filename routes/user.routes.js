@@ -32,7 +32,8 @@ module.exports = (app) => {
   app.get('/user', async (req, res) => {
     try{
       const token = req.headers.authorization.split(' ')[1];
-      const user= userService.getUserByToken(token);
+      const user = await userService.getUserByToken(token);
+      console.trace(user);
       if(user)
         res.status(200).json(user);
       else
@@ -44,14 +45,19 @@ module.exports = (app) => {
   })
 
   app.get('/user/:userId', userMiddlewares.hasAccessToUser, async (req, res) => {
-    const user = await userService.getUserById(req.params.userId);
-    
-    if(user){
-      res.status(200).json(user);
-    }
-    else{
-      console.error('User not found').
-      res.status(404);
+    try{
+      const user = await userService.getUserById(req.params.userId);
+      console.log('2');
+      console.log(user);
+      if(user){
+        res.status(200).json(user);
+      }
+      else{
+        console.error('User not found').
+        res.status(404);
+      }
+    }catch(err){
+      console.error(err);
     }
   })
 
@@ -77,7 +83,7 @@ module.exports = (app) => {
     const orders = await userService.getUserOrders(req.params.userId);
     
     if(orders){
-      res.status(200).json(onvrdisplaypointerunrestricted);
+      res.status(200).json(orders);
     }
     else{
       console.error('User not found').
