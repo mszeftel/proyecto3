@@ -1,106 +1,76 @@
 const config = require('../config/config.js')
-const jwt = require('jsonwebtoken');
+const Sequelize = require('sequelize');
+const initModels = require('../models/init-models');
+const Moment = require('moment');
+const orders = require('../models/orders.js');
 
-const _users = [
+const sequelize = new Sequelize(
+	`${config.DB_DIALECT}://${config.DB_USER}:${config.DB_PASS}@${config.DB_HOST}:${config.DB_PORT}/${config.DB_DATABASE}`,
 	{
-		id: 1,
-		username: 'admin',
-		password: 'admin1234',
-		email: 'mszeftel@gmail.com',
-		admin: true
-	},
-	{
-		id: 2,
-		username: 'mati',
-		password: 'mati1234',
-		email: 'mszeftel@gmail.com',
-		admin: false
+		logging: false
 	}
-]
-let _lastId = 2;
+);
 
-function findByUsername(username) {
-	const user = _users.find(usr => usr.username == username);
-	if (user) user.password = undefined;
-	return user;
+const { OrderItems, Orders, Products, Users } = initModels(sequelize);
+
+function invalidOrderLine(orderLine) {
+	const dontExist = Products.findOne({ where: { id: orderLine.productId } }) ? false : true;
+	const quantity = parseInt(orderLine.quantity);
+	return dontExist || isNaN(quantity) || quantity < 1;
 }
 
-function usernameExists(username) {
-	return (findByUsername(username)) ? true : false;
-}
+function validateOrderBody(orderBody) {
+	const { orderLines, payment, deliveryAddress } = orderBody;
 
-function validateUserObj(userObj) {
-	const { username, email, password, name, lastName, address, phone } = userObj;
-
-	if (!username || username == '' || findByUsername(username))
-		throw new Error('Missing username or invalid');
-	else if (!email || email == '')
-		throw new Error('Missing email or invalid');
-	else if (!password || password == '')
-		throw new Error('Missing passord or invalid');
-	else if (!name || name == '')
-		throw new Error('Missing name or invalid');
-	else if (!lastName || lastName == '')
-		throw new Error('Missing last name or invalid');
-	else if (!address || address == '')
-		throw new Error('Missing address or invalid');
-	else if (!phone || phone == '')
-		throw new Error('Missing phone or invalid');
+	if (!payment || !['cash', 'card'].includes(payment))
+		throw new Error('Missing payment or invalid');
+	else if (!deliveryAddress || deliveryAddress == '')
+		throw new Error('Missing deliveryAddress or invalid');
+	else if (!orderLines || orderLines.length == 0 || orderLines.some(line => invalidOrderLine(line)))
+		throw new Error('Missing or invalid orderLine');
 
 	return true;
-
 }
 
-async function signIn(username, password) {
-	//Check credentials
-	const user = _users.find(usr => usr.username == username && usr.password == password);
+async function orderFromBody(orderBody) {
+	//main order data
+	try {
+		const orderObject = {
+			delivaryAddres: orderBody.deliveryAddress,
+			payment: orderBody.payment
+		};
+		orderObject.OrderItems = [];
 
-	if (user) {
-		const token = jwt.sign({
-			id: user.id,
-			username: user.username,
-			email: user.email
-		}, config.JWT_KEY, {
-			algorithm: "HS512",
-			expiresIn: 12000
+		orderBody.orderLines.forEach(async line => {
+			const product = await Products.findOne({ where: { id: orderLine.productId } });
+			product.quantity = line.quantity;
+			orderObject.OrderItems.push(product);
 		});
 
-		return token;
+	} catch (error) {
+		throw error;
 	}
-	else {
-		return undefined;
-	}
+
 }
 
-async function create(userObj) {
-
-	const { username, email, password, name, lastName, address, phone } = userObj;
+async function create(userId, orderBody) {
 
 	try {
-		validateUserObj(userObj);
+		validateOrderBody(orderBody);
+		const orderObj = orderFromBody(orderBody);
+		orderObj.userId = userId;
+		orderObj.createdAt = Date.now();
+		orderObj.status = 'new';
 
-		_users.push({
-			id: ++_lastId,
-			username,
-			email,
-			password,
-			name,
-			lastName,
-			phone,
-			address,
-			admin: false
-		})
+		const newOrder = Order.create({
+			userId: orderObj.userId,
+			payment: orderObj.payment,
+			status: orderObj.status,
+			delivaryAddress: orderObj.deliveryAddress,
+			createdAt: orderObj.createdAt
+		});
 
-		return {
-			id: _lastId,
-			username,
-			email,
-			name,
-			lastName,
-			phone,
-			address,
-			admin: false
-		}
+		return newOrder.save();
 
 	}
 	catch (error) {
@@ -108,9 +78,9 @@ async function create(userObj) {
 	}
 }
 
-async function update(id,userObj) {
+async function update(id, userObj) {
 
-	const {email, password, name, lastName, address, phone } = userObj;
+	const { email, password, name, lastName, address, phone } = userObj;
 	const oldUser = getUserById(id);
 
 	try {
@@ -135,19 +105,22 @@ async function update(id,userObj) {
 	}
 }
 
-function getUserById(id) {
-	const user = _users.find(usr => usr.id == id);
-	if (user) user.password = undefined;
-	return user;
-}
+async function getOrderById(orderId) {
 
-function getUserByToken(token) {
-	const decodedUser = jwt.verify(token, config.JWT_KEY);
-	const user = getUserById(decodedUser.id);
-	if (user) user.password = undefined;
-	return user;
+	const order = await Orders.findOne({
+		where: {
+			id: orderId
+		},
+		include: {
+			model: OrderItems,
+			as: 'orderItems',
+		},
+	});
+
+	return order;
+
 }
 
 module.exports = {
-	getUserById, getUserByToken, signIn, create, update
+	create, update, getOrderById
 }

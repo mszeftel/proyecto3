@@ -4,18 +4,21 @@ const Sequelize = require('sequelize');
 const initModels = require('../models/init-models');
 
 
-const sequelize = new Sequelize(`${config.DB_DIALECT}://${config.DB_USER}:${config.DB_PASS}@${config.DB_HOST}:${config.DB_PORT}/${config.DB_DATABASE}`);
+const sequelize = new Sequelize(
+	`${config.DB_DIALECT}://${config.DB_USER}:${config.DB_PASS}@${config.DB_HOST}:${config.DB_PORT}/${config.DB_DATABASE}`,
+	{
+		logging: false
+	}
+);
 
 const { OrderItems, Orders, Products, Users } = initModels(sequelize);
 
 async function findByUsername(username) {
-	const user = await Users.findOne({raw:true,
+	const user = await Users.findOne({
 		where:{
 			username: username
 		}
 	});
-
-	if (user) user.password = undefined;
 
 	return user;
 }
@@ -24,7 +27,7 @@ function usernameExists(username) {
 	return (findByUsername(username)) ? true : false;
 }
 
-async function validateUserObj(userObj) {
+async function validateNewUserObj(userObj) {
 	const { username, email, password, name, lastname, address, phone } = userObj;
 
 	if (!username || username == '' || await findByUsername(username))
@@ -44,6 +47,12 @@ async function validateUserObj(userObj) {
 
 	return true;
 
+}
+
+async function validateUpdateUserObj(userObj) {
+	const {email, password, name, lastname, address, phone } = userObj;
+
+	return true;
 }
 
 async function signIn(username, password) {
@@ -77,7 +86,7 @@ async function create(userObj) {
 	const { username, email, password, name, lastname, address, phone } = userObj;
 
 	try {
-		await validateUserObj(userObj);
+		await validateNewUserObj(userObj);
 
 		const user = await Users.create({username,email,name,lastname,address,phone,password,admin:false});
 		user.password=undefined;
@@ -90,10 +99,13 @@ async function create(userObj) {
 }
 
 async function update(id, userObj) {
-	const { email, password, name, lastName, address, phone } = userObj;
-	const oldUser = getUserById(id);
-
+	const { email, password, name, lastname, address, phone } = userObj;
+	
 	try {
+		await validateUpdateUserObj(userObj);
+		
+		const oldUser = await getUserById(id);
+
 		if (!oldUser)
 			throw new Error('User not found');
 		if (email && email != '')
@@ -102,13 +114,14 @@ async function update(id, userObj) {
 			oldUser.password = password;
 		if (name && name != '')
 			oldUser.name = name;
-		if (lastName && lastName != '')
-			oldUser.lastName = lastName;
+		if (lastname && lastname != '')
+			oldUser.lastname = lastname;
 		if (address && address != '')
 			oldUser.address = address;
 		if (phone && phone != '')
 			oldUser.phone = phone;
 
+		oldUser.save();
 	}
 	catch (error) {
 		throw (error);
@@ -116,17 +129,13 @@ async function update(id, userObj) {
 }
 
 async function getUserById(id) {
-	const user = await Users.findOne( {raw: true,
+	const user = await Users.findOne({
 		where:{
 			id: id
 		}
 	});
 
-	if(user) user.password=undefined;
-
 	return user;
-
-	//console.log('getuserById',user);
 }
 
 async function getUserByToken(token) {
@@ -138,19 +147,30 @@ async function getUserByToken(token) {
 
 async function getUserOrders(userId){
 	try{
-		const orders = await Orders.findAll({raw: true,nest: true, include: OrderItems,
+		const orders = await Orders.findAll({
+			include: {
+				model: OrderItems,
+				as: 'orderItems',
+			},
 			where:{
-				user_id: userId
-			}
+				userId: userId
+			},
+			order: ['created','DESC']
 		})
+
+		//const orders = results.map(r=>r.DataValues);
+		//clean ids.
+		orders.forEach( order => {
+			order.orderItems.forEach(item => {
+				item.orderId=item.productId=undefined;
+			})	
+		});
 
 		return orders;
 	}catch(err){
 		console.error(err);
+		throw(err);
 	}
-
-
-
 }
 
 module.exports = {

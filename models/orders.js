@@ -9,7 +9,8 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       primaryKey: true
     },
-    user_id: {
+    userId: {
+      field: 'user_id',
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
       references: {
@@ -27,15 +28,18 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       defaultValue: "new"
     },
-    delivery_address: {
+    deliveryAddress: {
+      field: 'delivery_address',
       type: DataTypes.STRING(255),
       allowNull: false
     },
-    created: {
+    createdAt: {
+      field: 'created_at',
       type: DataTypes.DATE,
       allowNull: false
     },
-    confirmed: {
+    confirmedAt: {
+      field: 'created_at',
       type: DataTypes.DATE,
       allowNull: false
     }

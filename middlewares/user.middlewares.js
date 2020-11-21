@@ -6,7 +6,6 @@ exports.hasAccessToUser = async (req,res,next) => {
 	try{
 		const token = req.headers.authorization.split(' ')[1];
 		const user= await userService.getUserByToken(token);
-		console.log('User:',user);
 		
 		if(user.id==req.params.userId || user.admin){
 			next();

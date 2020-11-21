@@ -19,8 +19,10 @@ module.exports = (app) => {
   app.post('/user', async (req, res) => {
     try {
       const user = await userService.create(req.body);
-      if (user)
+      if (user){
+        user.password=undefined;
         res.status(201).json(user);
+      }
       else
         throw new Error('User could not be created');
     }
@@ -33,9 +35,11 @@ module.exports = (app) => {
     try{
       const token = req.headers.authorization.split(' ')[1];
       const user = await userService.getUserByToken(token);
-      console.trace(user);
-      if(user)
+      
+      if(user){
+        user.password=undefined;
         res.status(200).json(user);
+      }
       else
         throw new Error("User not found");
     }
@@ -47,9 +51,9 @@ module.exports = (app) => {
   app.get('/user/:userId', userMiddlewares.hasAccessToUser, async (req, res) => {
     try{
       const user = await userService.getUserById(req.params.userId);
-      console.log('2');
-      console.log(user);
+
       if(user){
+        user.password=undefined;
         res.status(200).json(user);
       }
       else{
@@ -67,10 +71,10 @@ module.exports = (app) => {
     if(user){
       try{
         await userService.update(user.id,req.body);
-        res.send(200).send('User updated');
+        res.status(200).send('User updated');
       }
       catch(error){
-        res.send(404).send('Could not udpate user. '+error.message);
+        res.status(404).send('Could not udpate user. '+error.message);
       }
     }
     else{

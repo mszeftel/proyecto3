@@ -9,7 +9,8 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       primaryKey: true
     },
-    order_id: {
+    orderId: {
+      field: 'order_id',
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
       references: {
@@ -17,7 +18,8 @@ module.exports = function(sequelize, DataTypes) {
         key: 'id'
       }
     },
-    product_id: {
+    productId: {
+      field: 'product_id',
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
       references: {
@@ -32,6 +34,14 @@ module.exports = function(sequelize, DataTypes) {
     quantity: {
       type: DataTypes.SMALLINT.UNSIGNED,
       allowNull: false
+    },
+    name: {
+      type: DataTypes.STRING(255),
+      allowNull: false
+    },
+    image_url: {
+      type: DataTypes.STRING(2048),
+      allowNull: true
     }
   }, {
     sequelize,
