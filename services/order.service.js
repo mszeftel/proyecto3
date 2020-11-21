@@ -13,39 +13,56 @@ const sequelize = new Sequelize(
 
 const { OrderItems, Orders, Products, Users } = initModels(sequelize);
 
-function invalidOrderLine(orderLine) {
-	const dontExist = Products.findOne({ where: { id: orderLine.productId } }) ? false : true;
+async function invalidOrderLine(orderLine) {
+	const product = await Products.findOne({ where: { id: orderLine.productId } });
+	const dontExist = product ? false : true;
 	const quantity = parseInt(orderLine.quantity);
+
 	return dontExist || isNaN(quantity) || quantity < 1;
 }
 
-function validateOrderBody(orderBody) {
+async function validateOrderBody(orderBody) {
 	const { orderLines, payment, deliveryAddress } = orderBody;
+	try {
 
-	if (!payment || !['cash', 'card'].includes(payment))
-		throw new Error('Missing payment or invalid');
-	else if (!deliveryAddress || deliveryAddress == '')
-		throw new Error('Missing deliveryAddress or invalid');
-	else if (!orderLines || orderLines.length == 0 || orderLines.some(line => invalidOrderLine(line)))
-		throw new Error('Missing or invalid orderLine');
+		if (!payment || !['cash', 'card'].includes(payment))
+			throw new Error('Missing payment or invalid');
+		else if (!deliveryAddress || deliveryAddress == '')
+			throw new Error('Missing deliveryAddress or invalid');
+		else if (!orderLines || orderLines.length == 0 || orderLines.some(line => {
+			invalidOrderLine(line)
+				.then(r => {
+					return r;
+				})
+		}))
+			throw new Error('Missing or invalid orderLines');
 
-	return true;
+		return true;
+	}
+	catch (error) {
+		throw error;
+	}
+
 }
 
 async function orderFromBody(orderBody) {
 	//main order data
 	try {
 		const orderObject = {
-			delivaryAddres: orderBody.deliveryAddress,
+			deliveryAddress: orderBody.deliveryAddress,
 			payment: orderBody.payment
 		};
-		orderObject.OrderItems = [];
+		orderObject.orderItems = [];
 
-		orderBody.orderLines.forEach(async line => {
-			const product = await Products.findOne({ where: { id: orderLine.productId } });
-			product.quantity = line.quantity;
-			orderObject.OrderItems.push(product);
-		});
+		await Promise.all(orderBody.orderLines.map(line => Products.findOne({ raw: true, where: { id: line.productId } })))
+			.then(products => {
+				products.forEach((product, i) => {
+					product.quantity = orderBody.orderLines[i].quantity;
+					orderObject.orderItems.push(product);
+				})
+			})
+
+		return orderObject;
 
 	} catch (error) {
 		throw error;
@@ -54,24 +71,38 @@ async function orderFromBody(orderBody) {
 }
 
 async function create(userId, orderBody) {
-
 	try {
-		validateOrderBody(orderBody);
-		const orderObj = orderFromBody(orderBody);
+		await validateOrderBody(orderBody);
+		const orderObj = await orderFromBody(orderBody);
+
 		orderObj.userId = userId;
 		orderObj.createdAt = Date.now();
 		orderObj.status = 'new';
 
-		const newOrder = Order.create({
+		const newOrder = await Orders.create({
 			userId: orderObj.userId,
 			payment: orderObj.payment,
 			status: orderObj.status,
-			delivaryAddress: orderObj.deliveryAddress,
-			createdAt: orderObj.createdAt
+			deliveryAddress: orderObj.deliveryAddress,
+			createdAt: orderObj.createdAt,
+			confirmedAt: null
 		});
 
-		return newOrder.save();
+		const createdOrder = await newOrder.save();
+		const orderId = createdOrder.id;
 
+		for (let i = 0; i < orderObj.orderItems.length; ++i) {
+			line = orderObj.orderItems[i];
+			line.productId=line.id;
+			line.id=undefined;
+
+			line.orderId = orderId;
+
+			const newItem = await OrderItems.create(line);
+			await newItem.save();
+		}
+
+		return await getOrderById(orderId);
 	}
 	catch (error) {
 		throw (error);
@@ -117,8 +148,20 @@ async function getOrderById(orderId) {
 		},
 	});
 
+	order.dataValues.amount=amountOrder(order);
+	
+
 	return order;
 
+}
+
+function amountOrder(order){
+	const amount=order.dataValues.orderItems.reduce((acc,item)=>{
+		return acc+item.quantity*item.price
+	},
+	0);
+
+	return amount;
 }
 
 module.exports = {

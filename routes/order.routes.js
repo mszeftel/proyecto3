@@ -9,12 +9,10 @@ module.exports = (app) => {
       const token = req.headers.authorization.split(' ')[1];
       const user = await userService.getUserByToken(token);
 
-      const orderBody=validateOrderBody(req.body);
-
-      const order = orderService.create(user.id,orderBody);
+      const order = await orderService.create(user.id,req.body);
 
       if(order)
-        req.status(201).json(order);
+        res.status(201).json(order);
       else
         throw new Error('Order could not be created');
     }

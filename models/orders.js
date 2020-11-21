@@ -39,9 +39,9 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     confirmedAt: {
-      field: 'created_at',
+      field: 'confirmed_at',
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: true
     }
   }, {
     sequelize,
