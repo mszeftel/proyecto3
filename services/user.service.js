@@ -155,10 +155,9 @@ async function getUserOrders(userId){
 			where:{
 				userId: userId
 			},
-			order: ['created','DESC']
+			order: [['created_at','DESC']]
 		})
 
-		//const orders = results.map(r=>r.DataValues);
 		//clean ids.
 		orders.forEach( order => {
 			order.orderItems.forEach(item => {

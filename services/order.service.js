@@ -1,8 +1,6 @@
 const config = require('../config/config.js')
 const Sequelize = require('sequelize');
 const initModels = require('../models/init-models');
-const Moment = require('moment');
-const orders = require('../models/orders.js');
 
 const sequelize = new Sequelize(
 	`${config.DB_DIALECT}://${config.DB_USER}:${config.DB_PASS}@${config.DB_HOST}:${config.DB_PORT}/${config.DB_DATABASE}`,
@@ -164,6 +162,24 @@ function amountOrder(order){
 	return amount;
 }
 
+async function getAllOrders(_offset,_limit){
+	const limit=(_limit>100)?100:_limit;
+	const page=(_offset<0)?0:_offset;
+
+	const {count,rows} = await Orders.findAndCountAll({
+		order: [['created_at','DESC']],
+		include: {
+			model: OrderItems,
+			as: 'orderItems',
+		},
+		
+		limit: limit,
+		offset: (page-1)*limit
+	});
+
+	return rows;
+}
+
 module.exports = {
-	create, update, getOrderById
+	create, update, getOrderById, getAllOrders
 }

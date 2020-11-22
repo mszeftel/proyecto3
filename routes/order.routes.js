@@ -34,51 +34,22 @@ module.exports = (app) => {
     }
   })
 
-  app.put('/order/:orderId', orderMiddlewares.hasAccessToOrder, async (req, res) => {
-    const order = await orderService.getOrderById(req.params.orderId);
-    
-    if(order){
-      try{
-        await orderService.update(order.id,req.body);
-        res.status(200).send('Order updated');
-      }
-      catch(error){
-        res.status(404).send('Could not udpate order. '+error.message);
-      }
-    }
-    else{
-      res.status(404).send('Order not found');
-    }
-  })
-
-  app.delete('/order/:orderId', orderMiddlewares.hasAccessToOrder, async (req, res) => {
-    const order = await orderService.getOrderById(req.params.orderId);
-    
-    if(order){
-      try{
-        //Check the order status...before confirmed? before preparing?
-
-        await orderService.update(order.id,req.body);
-        res.status(200).send('Order updated');
-      }
-      catch(error){
-        res.status(404).send('Could not udpate order. '+error.message);
-      }
-    }
-    else{
-      res.status(404).send('Order not found');
-    }
-  })
-
-  app.get('/orders', orderMiddlewares.isAdmin, async (req, res) => {
+  app.get('/order', orderMiddlewares.isAdmin, async (req, res) => {
     //Paginate this!!!
-    const orders = await orderService.getAllOrders(req.params.orderId);
+    const limit = req.query.limit || 50;
+    const offset = req.query.offset || 0;
+
+    if( isNaN(parseInt(limit)) || isNaN(parseInt(offset))){
+      res.status(400).send('Bad query parameteres');
+    }
+
+    const orders = await orderService.getAllOrders(offset,limit);
     
     if(orders){
-      res.status(200).json();
+      res.status(200).json(orders);
     }
     else{
-      console.error('order not found').
+      console.error('Orders not found').
       res.status(404);
     }
   })

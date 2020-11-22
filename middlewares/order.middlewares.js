@@ -27,7 +27,7 @@ exports.isAdmin = async (req,res,next) => {
 		const token = req.headers.authorization.split(' ')[1];
 		const user= await userService.getUserByToken(token);
 		
-		if(user.id==req.params.userId || user.admin){
+		if(user.admin){
 			next();
 		}
 		else
