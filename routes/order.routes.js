@@ -34,14 +34,12 @@ module.exports = (app) => {
     }
   })
 
-  app.get('/order', orderMiddlewares.isAdmin, async (req, res) => {
-    //Paginate this!!!
-    const limit = req.query.limit || 50;
-    const offset = req.query.offset || 0;
+  app.get('/order', orderMiddlewares.isAdmin, async (req, res) => { 
+    let limit=parseInt(req.query.limit);
+    let offset=parseInt(req.query.offset);
 
-    if( isNaN(parseInt(limit)) || isNaN(parseInt(offset))){
-      res.status(400).send('Bad query parameteres');
-    }
+    if(isNaN(limit)) limit=50;
+    if(isNaN(offset)) offset=0; 
 
     const orders = await orderService.getAllOrders(offset,limit);
     
@@ -49,8 +47,7 @@ module.exports = (app) => {
       res.status(200).json(orders);
     }
     else{
-      console.error('Orders not found').
-      res.status(404);
+      res.status(404).send('Orders not found');
     }
   })
 }

@@ -164,7 +164,7 @@ function amountOrder(order){
 
 async function getAllOrders(_offset,_limit){
 	const limit=(_limit>100)?100:_limit;
-	const page=(_offset<0)?0:_offset;
+	const offset=(_offset<0)?0:_offset;
 
 	const {count,rows} = await Orders.findAndCountAll({
 		order: [['created_at','DESC']],
@@ -174,7 +174,7 @@ async function getAllOrders(_offset,_limit){
 		},
 		
 		limit: limit,
-		offset: (page-1)*limit
+		offset: offset
 	});
 
 	return rows;
