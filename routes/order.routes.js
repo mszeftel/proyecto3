@@ -23,11 +23,45 @@ module.exports = (app) => {
 
   app.get('/order/:orderId', orderMiddlewares.hasAccessToOrder, async (req, res) => {
     try{
-      const order = await orderService.getOrderById(req.params.orderId);
+      const order = await orderService.getById(req.params.orderId);
       if(order)
         res.status(200).json(order);
       else
         throw new Error("Order not found");
+    }
+    catch (error){
+      res.status(404).json({error: error.message});
+    }
+  })
+
+  app.get('/order/:orderId/status', orderMiddlewares.hasAccessToOrder, async (req, res) => {
+    try{
+      const order = await orderService.getById(req.params.orderId);
+      if(order)
+        res.status(200).json({status: order.status});
+      else
+        throw new Error("Order not found");
+    }
+    catch (error){
+      res.status(404).json({error: error.message});
+    }
+  })
+
+  app.put('/order/:orderId/status', orderMiddlewares.isAdmin, async (req, res) => {
+    try{
+      const order = await orderService.getById(req.params.orderId);
+
+      if(!order)
+        throw new Error("Order not found");
+
+      if( ['new','confirmed','preparing','delivering','delivered'].includes(req.body.status) ){
+        order.status=req.body.status;
+        await order.save();
+        res.status(200).send('Order status updated');
+      }
+      else
+        throw new Error("Invalid status");
+        
     }
     catch (error){
       res.status(404).json({error: error.message});
@@ -41,7 +75,7 @@ module.exports = (app) => {
     if(isNaN(limit)) limit=50;
     if(isNaN(offset)) offset=0; 
 
-    const orders = await orderService.getAllOrders(offset,limit);
+    const orders = await orderService.getAll(offset,limit);
     
     if(orders){
       res.status(200).json(orders);

@@ -8,7 +8,7 @@ exports.hasAccessToOrder = async (req,res,next) => {
 		const token = req.headers.authorization.split(' ')[1];
 		const user= await userService.getUserByToken(token);
 
-		const order = await orderService.getOrderById(req.params.orderId);
+		const order = await orderService.getById(req.params.orderId);
 		
 		if(user.id==order.userId || user.admin){
 			next();

@@ -100,7 +100,7 @@ async function create(userId, orderBody) {
 			await newItem.save();
 		}
 
-		return await getOrderById(orderId);
+		return await getById(orderId);
 	}
 	catch (error) {
 		throw (error);
@@ -134,7 +134,7 @@ async function update(id, userObj) {
 	}
 }
 
-async function getOrderById(orderId) {
+async function getById(orderId) {
 
 	const order = await Orders.findOne({
 		where: {
@@ -162,7 +162,7 @@ function amountOrder(order){
 	return amount;
 }
 
-async function getAllOrders(_offset,_limit){
+async function getAll(_offset,_limit){
 	const limit=(_limit>100)?100:_limit;
 	const offset=(_offset<0)?0:_offset;
 
@@ -181,5 +181,5 @@ async function getAllOrders(_offset,_limit){
 }
 
 module.exports = {
-	create, update, getOrderById, getAllOrders
+	create, update, getById, getAll
 }
