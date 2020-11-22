@@ -11,7 +11,7 @@ const sequelize = new Sequelize(
 	}
 );
 
-const { OrderItems, Orders, Products, Users } = initModels(sequelize);
+const {Users} = initModels(sequelize);
 
 async function findByUsername(username) {
 	const user = await Users.findOne({
@@ -43,12 +43,6 @@ async function validateUserBody(userBody) {
 
 	return true;
 
-}
-
-async function validateUpdateUserObj(userObj) {
-	const {email, password, name, lastname, address, phone } = userObj;
-
-	return true;
 }
 
 async function signIn(username, password) {
@@ -98,8 +92,6 @@ async function update(id, userObj) {
 	const { email, password, name, lastname, address, phone } = userObj;
 	
 	try {
-		await validateUpdateUserObj(userObj);
-		
 		const oldUser = await getById(id);
 
 		if (!oldUser)

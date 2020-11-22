@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
 	}
 );
 
-const { OrderItems, Orders, Products, Users } = initModels(sequelize);
+const { OrderItems, Orders, Products} = initModels(sequelize);
 
 async function invalidOrderLine(orderLine) {
 	const product = await Products.findOne({ where: { id: orderLine.productId } });
