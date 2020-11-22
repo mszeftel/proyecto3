@@ -1,5 +1,5 @@
-const productService = require('../services/product.service.js');
-const productMiddlewares = require('../middlewares/product.middlewares.js');
+const productService = require('../services/product.service');
+const productMiddlewares = require('../middlewares/product.middlewares');
 
 module.exports = (app) => {
   //Create prodcut

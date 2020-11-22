@@ -1,6 +1,6 @@
-const orderService = require('../services/order.service.js');
-const userService = require('../services/user.service.js');
-const orderMiddlewares = require('../middlewares/order.middlewares.js');
+const orderService = require('../services/order.service');
+const userService = require('../services/user.service');
+const orderMiddlewares = require('../middlewares/order.middlewares');
 
 module.exports = (app) => {
   //Login ordername and password. Return JWT token if success.
@@ -72,7 +72,7 @@ module.exports = (app) => {
     let limit=parseInt(req.query.limit);
     let offset=parseInt(req.query.offset);
 
-    if(isNaN(limit)) limit=50;
+    if(isNaN(limit)) limit=25;
     if(isNaN(offset)) offset=0; 
 
     const orders = await orderService.getAll(offset,limit);

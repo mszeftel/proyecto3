@@ -37,16 +37,10 @@ module.exports = function(sequelize, DataTypes) {
       field: 'created_at',
       type: DataTypes.DATE,
       allowNull: false
-    },
-    confirmedAt: {
-      field: 'confirmed_at',
-      type: DataTypes.DATE,
-      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'orders',
-    schema: 'proyecto3',
     timestamps: false,
     indexes: [
       {

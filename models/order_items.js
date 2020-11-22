@@ -39,14 +39,14 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(255),
       allowNull: false
     },
-    image_url: {
+    imageUrl: {
+      field: 'image_url',
       type: DataTypes.STRING(2048),
       allowNull: true
     }
   }, {
     sequelize,
     tableName: 'order_items',
-    schema: 'proyecto3',
     timestamps: false,
     indexes: [
       {

@@ -1,4 +1,4 @@
-const config = require('../config/config.js')
+const config = require('../config/config')
 const Sequelize = require('sequelize');
 const initModels = require('../models/init-models');
 
@@ -109,7 +109,7 @@ async function create(userId, orderBody) {
 
 async function update(id, userObj) {
 
-	const { email, password, name, lastName, address, phone } = userObj;
+	const { email, password, name, lastname, address, phone } = userObj;
 	const oldUser = getUserById(id);
 
 	try {
@@ -121,8 +121,8 @@ async function update(id, userObj) {
 			oldUser.password = password;
 		if (name && name != '')
 			oldUser.name = name;
-		if (lastName && lastName != '')
-			oldUser.lastName = lastName;
+		if (lastname && lastname != '')
+			oldUser.lastname = lastname;
 		if (address && address != '')
 			oldUser.address = address;
 		if (phone && phone != '')
@@ -180,6 +180,37 @@ async function getAll(_offset,_limit){
 	return rows;
 }
 
+
+async function getUserOrders(userId,limit,offset){
+	try{
+		const {count,rows} = await Orders.findAndCountAll({
+			include: {
+				model: OrderItems,
+				as: 'orderItems',
+			},
+			where:{
+				userId: userId
+			},
+			order: [['created_at','DESC']],
+			limit: limit,
+			offset: offset
+		})
+
+		//clean ids.
+		rows.forEach( order => {
+			order.orderItems.forEach(item => {
+				item.orderId=item.productId=undefined;
+			})	
+		});
+
+		return rows;
+	}catch(err){
+		console.error(err);
+		throw(err);
+	}
+}
+
+
 module.exports = {
-	create, update, getById, getAll
+	create, update, getById, getAll, getUserOrders
 }

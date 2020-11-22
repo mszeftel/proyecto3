@@ -23,12 +23,8 @@ async function findByUsername(username) {
 	return user;
 }
 
-function usernameExists(username) {
-	return (findByUsername(username)) ? true : false;
-}
-
-async function validateNewUserObj(userObj) {
-	const { username, email, password, name, lastname, address, phone } = userObj;
+async function validateUserBody(userBody) {
+	const { username, email, password, name, lastname, address, phone } = userBody;
 
 	if (!username || username == '' || await findByUsername(username))
 		throw new Error('Missing username or invalid');
@@ -86,7 +82,7 @@ async function create(userObj) {
 	const { username, email, password, name, lastname, address, phone } = userObj;
 
 	try {
-		await validateNewUserObj(userObj);
+		await validateUserBody(userObj);
 
 		const user = await Users.create({username,email,name,lastname,address,phone,password,admin:false});
 		user.password=undefined;
@@ -104,7 +100,7 @@ async function update(id, userObj) {
 	try {
 		await validateUpdateUserObj(userObj);
 		
-		const oldUser = await getUserById(id);
+		const oldUser = await getById(id);
 
 		if (!oldUser)
 			throw new Error('User not found');
@@ -128,7 +124,7 @@ async function update(id, userObj) {
 	}
 }
 
-async function getUserById(id) {
+async function getById(id) {
 	const user = await Users.findOne({
 		where:{
 			id: id
@@ -140,38 +136,11 @@ async function getUserById(id) {
 
 async function getUserByToken(token) {
 	const decodedUser = jwt.verify(token, config.JWT_KEY);
-	const user = await getUserById(decodedUser.id);
+	const user = await getById(decodedUser.id);
 
 	return user;
 }
 
-async function getUserOrders(userId){
-	try{
-		const orders = await Orders.findAll({
-			include: {
-				model: OrderItems,
-				as: 'orderItems',
-			},
-			where:{
-				userId: userId
-			},
-			order: [['created_at','DESC']]
-		})
-
-		//clean ids.
-		orders.forEach( order => {
-			order.orderItems.forEach(item => {
-				item.orderId=item.productId=undefined;
-			})	
-		});
-
-		return orders;
-	}catch(err){
-		console.error(err);
-		throw(err);
-	}
-}
-
 module.exports = {
-	getUserById, getUserByToken, signIn, create, update, getUserOrders
+	getById, getUserByToken, signIn, create, update
 }
