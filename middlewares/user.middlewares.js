@@ -1,6 +1,4 @@
 const userService = require('../services/user.service.js');
-const jwt = require('jsonwebtoken');
-const config = require('../config/config.js')
 
 exports.hasAccessToUser = async (req,res,next) => {
 	try{

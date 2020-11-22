@@ -3,7 +3,23 @@ const userService = require('../services/user.service');
 const orderMiddlewares = require('../middlewares/order.middlewares');
 
 module.exports = (app) => {
-  //Login ordername and password. Return JWT token if success.
+  app.get('/order', orderMiddlewares.isAdmin, async (req, res) => { 
+    let limit=parseInt(req.query.limit);
+    let offset=parseInt(req.query.offset);
+
+    if(isNaN(limit)) limit=25;
+    if(isNaN(offset)) offset=0; 
+
+    const orders = await orderService.getAll(offset,limit);
+    
+    if(orders){
+      res.status(200).json(orders);
+    }
+    else{
+      res.status(404).send('Orders not found');
+    }
+  })
+  
   app.post('/order', async (req, res) => {  
     try{
       const token = req.headers.authorization.split(' ')[1];
@@ -68,20 +84,5 @@ module.exports = (app) => {
     }
   })
 
-  app.get('/order', orderMiddlewares.isAdmin, async (req, res) => { 
-    let limit=parseInt(req.query.limit);
-    let offset=parseInt(req.query.offset);
-
-    if(isNaN(limit)) limit=25;
-    if(isNaN(offset)) offset=0; 
-
-    const orders = await orderService.getAll(offset,limit);
-    
-    if(orders){
-      res.status(200).json(orders);
-    }
-    else{
-      res.status(404).send('Orders not found');
-    }
-  })
+  
 }

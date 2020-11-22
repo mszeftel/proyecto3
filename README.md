@@ -1,7 +1,7 @@
 # proyecto3 - Delilah Resto API Backend
 
 1. BASE DE DATOS
-	Para crear estructura de base de datos MariaDB importar archivo database.sql en root.
+	Para crear base de datos y estructura importar a MariaDB archivo database.sql.
 		Ej: mysql -h HOST -u USER -p < database.sql
 	
 	Si desea llenar la base de datos con ejemplos, hay un archivo demodata.sql que se puede importar.

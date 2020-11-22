@@ -1,7 +1,5 @@
 const userService = require('../services/user.service.js');
 const orderService = require('../services/order.service.js');
-const jwt = require('jsonwebtoken');
-const config = require('../config/config.js');
 
 exports.hasAccessToOrder = async (req,res,next) => {
 	try{
