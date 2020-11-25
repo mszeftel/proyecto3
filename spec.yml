@@ -119,6 +119,8 @@ paths:
       responses:
         '200':
           description: User updated.
+        '403':
+          description: Forbidden
           
   /user/{id}/orders:
     get:
@@ -157,6 +159,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Order'
+        '403':
+          description: Forbidden
   
   /order:
     get:
@@ -189,6 +193,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Order'
+        '403':
+          description: Forbidden
       
     post:
       tags:
@@ -207,6 +213,8 @@ paths:
             aplication/json:
               schema:
                 $ref: '#/components/schemas/Order'
+        '403':
+          description: Forbidden
    
   /order/{id}:
     get:
@@ -228,6 +236,8 @@ paths:
             aplication/json:
               schema:
                 $ref: '#/components/schemas/Order'
+        '403':
+          description: Forbidden
    
                   
   /order/{id}/status:
@@ -250,6 +260,8 @@ paths:
             aplication/json:
               schema:
                 $ref: '#/components/schemas/OrderStatus'
+        '403':
+          description: Forbidden
     put:
       tags:
       - Orders
@@ -271,6 +283,8 @@ paths:
       responses:
         '200':
           description: Ok.
+        '403':
+          description: Forbidden
   
   /product:
     post:
@@ -290,6 +304,8 @@ paths:
             aplication/json:
               schema:
                 $ref: '#/components/schemas/Product'
+        '403':
+          description: Forbidden
                 
     get:
       tags:
@@ -321,6 +337,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Order'
+        '403':
+          description: Forbidden
                   
     
    
@@ -344,6 +362,8 @@ paths:
             aplication/json:
               schema:
                 $ref: '#/components/schemas/Product'
+        '403':
+          description: Forbidden
     put:
       tags:
       - Products
@@ -365,6 +385,8 @@ paths:
       responses:
         '200':
           description: Ok.
+        '403':
+          description: Forbidden
           
     delete:
       tags:
@@ -381,6 +403,8 @@ paths:
       responses:
         '200':
           description: Product deleted
+        '403':
+          description: Forbidden
           
 components:
   schemas:
@@ -557,4 +581,3 @@ security:
   - bearerAuth:
     - user
     - admin
-                      
