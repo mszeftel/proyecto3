@@ -70,7 +70,9 @@ module.exports = (app) => {
       if(!order)
         throw new Error("Order not found");
 
-      if( ['new','confirmed','preparing','delivering','delivered'].includes(req.body.status) ){
+      const statusValues=orderService.statusValues();
+
+      if( statusValues.includes(req.body.status) ){
         order.status=req.body.status;
         await order.save();
         res.status(200).send('Order status updated');

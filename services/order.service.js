@@ -23,7 +23,7 @@ async function validateOrderBody(orderBody) {
 	const { orderLines, payment, deliveryAddress } = orderBody;
 	try {
 
-		if (!payment || !['cash', 'card'].includes(payment))
+		if (!payment || !paymentValues().includes(payment))
 			throw new Error('Missing payment or invalid');
 		else if (!deliveryAddress || deliveryAddress == '')
 			throw new Error('Missing deliveryAddress or invalid');
@@ -146,7 +146,8 @@ async function getById(orderId) {
 		},
 	});
 
-	order.dataValues.amount=amountOrder(order);
+	if(order)
+		order.dataValues.amount=amountOrder(order);
 	
 
 	return order;
@@ -210,7 +211,14 @@ async function getUserOrders(userId,limit,offset){
 	}
 }
 
+function statusValues(){
+	return Orders.rawAttributes.status.values;
+}
+
+function paymentValues(){
+	return Orders.rawAttributes.payment.values;
+}
 
 module.exports = {
-	create, update, getById, getAll, getUserOrders
+	create, update, getById, getAll, getUserOrders, statusValues, paymentValues,
 }

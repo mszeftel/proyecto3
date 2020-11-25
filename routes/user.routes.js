@@ -58,8 +58,7 @@ module.exports = (app) => {
         res.status(200).json(user);
       }
       else{
-        console.error('User not found').
-        res.status(404);
+        res.status(404).send('User not found');
       }
     }catch(err){
       console.error(err);
@@ -79,8 +78,7 @@ module.exports = (app) => {
       }
     }
     else{
-      console.error('No user found').
-      res.send(404);
+      res.status(404).send('User not found');
     }
   })
 
@@ -97,8 +95,7 @@ module.exports = (app) => {
       res.status(200).json(orders);
     }
     else{
-      console.error('User not found').
-      res.status(404);
+      res.status(404).send('User not found');
     }
   })
 }

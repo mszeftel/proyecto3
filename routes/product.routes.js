@@ -68,8 +68,7 @@ module.exports = (app) => {
       }
     }
     else{
-      console.error('No product found').
-      res.send(404);
+      res.status(404).send('Product not found');
     }
   })
 
@@ -86,7 +85,7 @@ module.exports = (app) => {
       }
     }
     else{
-      console.error('No product found').
+      res.status(404).send('Product not found');
       res.send(404);
     }
   })
