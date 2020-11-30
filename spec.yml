@@ -581,3 +581,4 @@ security:
   - bearerAuth:
     - user
     - admin
+                      

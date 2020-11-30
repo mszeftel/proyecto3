@@ -17,4 +17,4 @@
 
 4. Usuarios y contraseñas.
 	La base de datos se crea con un usuario admin default: {"username": "admin","password": "delilah"}.
-	Por favor utilice el Endpoint /user[POST] para completar la informacion y cambiar la contraseña.
+	Por favor utilice el Endpoint /user[PUT] para completar la informacion y cambiar la contraseña.
