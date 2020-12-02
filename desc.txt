@@ -1,0 +1,10 @@
+Proyecto 3 - Delilah
+
+Consideraciones:
+- Al ser parte de mi trabajo diario manejar SQL, decidí implementar la solución utilizando sólo modelos de Sequelize para interactuar con la base de datos.
+- En el caso de los OrderItems que pertenecen a una Order, se decidió duplicar la información del producto para poder mantener una consistencia histórica del pedido, pensando que si en el futuro se cambian parámetros de un producto, también se cambiaría el contenido pasado de una orden que lo contenga, lo que no sería un comportamiento deseado.
+- Las contraseñas están en formato plano en la base de datos. Para el próximo proyecto la idea es usar bcript para guardarlas como un hash+salt.
+
+GitHub:
+El proyecto se encuentra público en https://github.com/mszeftel/proyecto3 
+https://github.com/mszeftel/proyecto3.git
