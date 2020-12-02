@@ -18,3 +18,5 @@
 4. Usuarios y contraseñas.
 	La base de datos se crea con un usuario admin default: {"username": "admin","password": "delilah"}.
 	Por favor utilice el Endpoint /user[PUT] para completar la informacion y cambiar la contraseña.
+
+5. Se entrega Postman Collection para importar: Proyecto_3.postman.json
