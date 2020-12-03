@@ -86,5 +86,21 @@ module.exports = (app) => {
     }
   })
 
+  app.delete('/order/:orderId', orderMiddlewares.isAdmin, async (req, res) => {
+    try{
+      const order = await orderService.getById(req.params.orderId);
+      if(order){
+        await orderService.deleteById(req.params.orderId);
+      
+        res.status(200).send('Order deleted');
+      }
+      else
+        throw new Error("Order not found");
+    }
+    catch (error){
+      res.status(404).json({error: error.message});
+    }
+  })
+
   
 }

@@ -154,6 +154,35 @@ async function getById(orderId) {
 
 }
 
+async function deleteById(orderId) {
+	const tran = await sequelize.transaction();
+	try{
+		const order = await Orders.findOne({
+			where: {
+				id: orderId
+			},
+			include: {
+				model: OrderItems,
+				as: 'orderItems',
+			},
+		});
+		//Destroy all items in the order
+		await Promise.all(	order.orderItems.map ( item => item.destroy() )) ;
+		//And then destroy the order
+		await order.destroy();
+		//And then commit
+		await tran.commit();
+		return true;
+	}
+	catch(err){
+		await tran.rollback();
+
+		console.error(err);
+		throw(err);
+	}
+
+}
+
 function amountOrder(order){
 	const amount=order.dataValues.orderItems.reduce((acc,item)=>{
 		return acc+item.quantity*item.price
@@ -220,5 +249,5 @@ function paymentValues(){
 }
 
 module.exports = {
-	create, update, getById, getAll, getUserOrders, statusValues, paymentValues,
+	create, update, getById, getAll, getUserOrders, deleteById, statusValues, paymentValues,
 }
