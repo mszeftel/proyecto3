@@ -22,12 +22,15 @@
 			DB_DATABASE = delilah
 	- Cambiar la variable JWT_KEY !
 
-3. INICIAR
+3. Instalar DEPENDENCIAS del proyecto: 
+	npm install
+
+4. INICIAR
 	Iniciar el servidor con el archivo server.js
 		Ej: node server.js
 
-4. Usuarios y contraseñas.
+5. Usuarios y contraseñas.
 	La base de datos se crea con un usuario admin default: {"username": "admin","password": "delilah"}.
 	Por favor utilice el Endpoint /user[PUT] para completar la informacion y cambiar la contraseña.
 
-5. Se entrega Postman Collection para importar: Proyecto_3.postman.json
+6. Se entrega Postman Collection para importar: Proyecto_3.postman.json
