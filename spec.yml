@@ -1,67 +1,68 @@
+---
 openapi: 3.0.0
 info:
   title: Delilah
   description: API de pedidos de Delilah Restó
   version: 0.0.1
-
 servers:
-  - url: https://api.acamica.com.ar/v1
-
+- url: https://api.acamica.com.ar/v1
+security:
+- bearerAuth:
+  - user
+  - admin
 paths:
   /user:
-    post:
-      tags:
-      - Users
-      summary: Creates new user
-      security: []
-      requestBody:
-        required: true
-        content:
-          aplication/json:
-            schema:
-              allOf:
-                - $ref: '#/components/schemas/User'
-                - type: object
-                  required:
-                    - password
-                  properties:
-                    password:
-                      type: string
-      responses:
-        '200':
-          description: Ok. JSON object with id.
-          content:
-            aplication/json:
-              schema:
-                $ref: '#/components/schemas/User'
     get:
       tags:
       - Users
       summary: Returns user given the current JWT token.
-     
       responses:
-        '200':
+        "200":
           description: JSON user Object
           content:
             aplication/json:
               schema:
                 $ref: '#/components/schemas/User'
-        '403':
+        "403":
           description: Forbidden
+    post:
+      tags:
+      - Users
+      summary: Creates new user
+      requestBody:
+        content:
+          aplication/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/User'
+              - required:
+                - password
+                type: object
+                properties:
+                  password:
+                    type: string
+        required: true
+      responses:
+        "200":
+          description: Ok. JSON object with id.
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      security: []
   /user/login:
     post:
       tags:
       - Users
       summary: Logins user and returns JWT token if successful
-      security: []
       requestBody:
-        required: true
         content:
           aplication/json:
             schema:
               $ref: '#/components/schemas/LoginBody'
+        required: true
       responses:
-        '200':
+        "200":
           description: Ok. JSON object with id.
           content:
             aplication/json:
@@ -70,88 +71,95 @@ paths:
                 properties:
                   token:
                     type: string
-        '401':
+        "401":
           description: Bad credentials.
-   
+      security: []
   /user/{id}:
     get:
       tags:
       - Users
       summary: Returns user with {id}
-      parameters: 
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-        
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       responses:
-        '200':
+        "200":
           description: JSON user Object
           content:
             aplication/json:
               schema:
                 $ref: '#/components/schemas/User'
-        '403':
+        "403":
           description: Forbidden
-        '404':
+        "404":
           description: No id.
-              
     put:
       tags:
       - Users
       summary: Updates a user with {id}
-      parameters: 
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            
-      requestBody:
+      parameters:
+      - name: id
+        in: path
         required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
         content:
           aplication/json:
             schema:
               $ref: '#/components/schemas/User'
+        required: true
       responses:
-        '200':
+        "200":
           description: User updated.
-        '403':
+        "403":
           description: Forbidden
-          
   /user/{id}/orders:
     get:
       tags:
       - Users
       summary: Returns orders from user with {id} sorted by desc date
-      parameters: 
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            format: int64
-            minimum: 0
-            maximum: 25
-            default: 10
-        - name: offet
-          in: query
-          schema:
-            type: integer
-            format: int64
-            default: 0
-            minimum: 0
-        
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 25
+          minimum: 0
+          type: integer
+          format: int64
+          default: 10
+      - name: offet
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int64
+          default: 0
       responses:
-        '200':
+        "200":
           description: JSON Object
           content:
             aplication/json:
@@ -159,33 +167,37 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Order'
-        '403':
+        "403":
           description: Forbidden
-  
   /order:
     get:
       tags:
       - Orders
       summary: Returns orders from all users sorted by desc date [Admin only]
-      parameters: 
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            format: int32
-            minimum: 0
-            maximum: 50
-            default: 25
-        - name: offet
-          in: query
-          schema:
-            type: integer
-            format: int32
-            default: 0
-            minimum: 0
-        
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 50
+          minimum: 0
+          type: integer
+          format: int32
+          default: 25
+      - name: offet
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+          default: 0
       responses:
-        '200':
+        "200":
           description: JSON Object
           content:
             aplication/json:
@@ -193,143 +205,144 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Order'
-        '403':
+        "403":
           description: Forbidden
-      
     post:
       tags:
       - Orders
       summary: Creates new order
       requestBody:
-        required: true
         content:
           aplication/json:
             schema:
               $ref: '#/components/schemas/CU_Order'
+        required: true
       responses:
-        '200':
+        "200":
           description: Ok. JSON object with id.
           content:
             aplication/json:
               schema:
                 $ref: '#/components/schemas/Order'
-        '403':
+        "403":
           description: Forbidden
-   
   /order/{id}:
     get:
       tags:
       - Orders
       summary: Returns order with {id}
-      parameters: 
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-        
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       responses:
-        '200':
+        "200":
           description: JSON Object
           content:
             aplication/json:
               schema:
                 $ref: '#/components/schemas/Order'
-        '403':
+        "403":
           description: Forbidden
-   
-                  
+    delete:
+      tags:
+      - Orders
+      summary: Deletes order with {id} [Admin only]
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Order deleted.
+        "403":
+          description: Forbidden
   /order/{id}/status:
     get:
       tags:
       - Orders
       summary: Returns status of order with {id}
-      parameters: 
+      parameters:
       - name: id
         in: path
         required: true
+        style: simple
+        explode: false
         schema:
           type: integer
           format: int64
-          
       responses:
-        '200':
+        "200":
           description: JSON Object
           content:
             aplication/json:
               schema:
                 $ref: '#/components/schemas/OrderStatus'
-        '403':
+        "403":
           description: Forbidden
     put:
       tags:
       - Orders
       summary: Updates status of order with {id} [Admin only]
-      parameters: 
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            
-      requestBody:
+      parameters:
+      - name: id
+        in: path
         required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
         content:
           aplication/json:
             schema:
               $ref: '#/components/schemas/OrderStatus'
-      responses:
-        '200':
-          description: Ok.
-        '403':
-          description: Forbidden
-  
-  /product:
-    post:
-      tags:
-      - Products
-      summary: Creates new product [Admin only]
-      requestBody:
         required: true
-        content:
-          aplication/json:
-            schema:
-              $ref: '#/components/schemas/Product'
       responses:
-        '200':
-          description: Ok. JSON object with id.
-          content:
-            aplication/json:
-              schema:
-                $ref: '#/components/schemas/Product'
-        '403':
+        "200":
+          description: Ok.
+        "403":
           description: Forbidden
-                
+  /product:
     get:
       tags:
       - Products
       summary: Returns products ordered by name asc
-      parameters: 
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            format: int32
-            minimum: 0
-            maximum: 50
-            default: 25
-        - name: offet
-          in: query
-          schema:
-            type: integer
-            format: int32
-            default: 0
-            minimum: 0
-        
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 50
+          minimum: 0
+          type: integer
+          format: int32
+          default: 25
+      - name: offet
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+          default: 0
       responses:
-        '200':
+        "200":
           description: JSON Object
           content:
             aplication/json:
@@ -337,90 +350,105 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Order'
-        '403':
+        "403":
           description: Forbidden
-                  
-    
-   
+    post:
+      tags:
+      - Products
+      summary: Creates new product [Admin only]
+      requestBody:
+        content:
+          aplication/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+        required: true
+      responses:
+        "200":
+          description: Ok. JSON object with id.
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        "403":
+          description: Forbidden
   /product/{id}:
     get:
       tags:
       - Products
       summary: Returns product with {id}
-      parameters: 
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-        
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       responses:
-        '200':
+        "200":
           description: JSON Object
           content:
             aplication/json:
               schema:
                 $ref: '#/components/schemas/Product'
-        '403':
+        "403":
           description: Forbidden
     put:
       tags:
       - Products
       summary: Updates a product with {id} [Admin only]
-      parameters: 
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            
-      requestBody:
+      parameters:
+      - name: id
+        in: path
         required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
         content:
           aplication/json:
             schema:
               $ref: '#/components/schemas/Product'
+        required: true
       responses:
-        '200':
+        "200":
           description: Ok.
-        '403':
+        "403":
           description: Forbidden
-          
     delete:
       tags:
       - Products
       summary: Delete product with {id} [Admin only]
-      parameters: 
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-        
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       responses:
-        '200':
+        "200":
           description: Product deleted
-        '403':
+        "403":
           description: Forbidden
-          
 components:
   schemas:
     Id:
-      description: Record ID
       type: integer
+      description: Record ID
       format: int64
-      example: 123
       readOnly: true
-    
+      example: 123
     User:
       type: object
       properties:
         id:
           $ref: '#/components/schemas/Id'
-
         username:
           type: string
           example: johnnybgood
@@ -442,7 +470,6 @@ components:
         admin:
           type: boolean
           example: false
-    
     LoginBody:
       type: object
       properties:
@@ -476,7 +503,6 @@ components:
         deliveryAdress:
           type: string
           example: 34 Summer Str, Atlantida, Earth
-          
     CU_Order:
       type: object
       properties:
@@ -498,14 +524,11 @@ components:
               quantity:
                 type: integer
                 example: 1
-              
-              
         payment:
           $ref: '#/components/schemas/Payment'
         deliveryAdress:
           type: string
           example: 34 Summer Str, Atlantida, Earth
-        
     OrderItem:
       type: object
       properties:
@@ -518,33 +541,28 @@ components:
           example: 1
         price:
           $ref: '#/components/schemas/Currency'
-    
     OrderStatus:
-      description: Order status
       type: string
+      description: Order status
+      readOnly: true
       enum:
       - new
       - confirmed
       - preparing
       - delivering
       - delivered
-      readOnly: true
-      
     Currency:
-      description: Currency
       type: number
+      description: Currency
       format: float
-      example: 15.50
-      
+      example: 15.5
     Payment:
-      description: Payment type
       type: string
+      description: Payment type
       enum:
       - card
       - cash
-    
     Product:
-      description: Product type
       type: object
       properties:
         id:
@@ -557,9 +575,8 @@ components:
           example: https://images.com/filet_mignon.png
         price:
           $ref: '#/components/schemas/Currency'
-    
-    OrderProduct:
       description: Product type
+    OrderProduct:
       type: object
       properties:
         id:
@@ -570,15 +587,9 @@ components:
         imgUrl:
           type: string
           example: https://images.com/filet_mignon.png
-          
+      description: Product type
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      
-security:
-  - bearerAuth:
-    - user
-    - admin
-                      
