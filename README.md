@@ -8,8 +8,19 @@
 		Ej: mysql -h HOST -u USER -p < demodata.sql
 
 2. VARIABLES
-	Definir las variables de conexión y configuración. Usar archivo .env.sample de base y renombrar a .env
-	Cambiar la variable JWT_KEY !
+	Definir las variables de entorno, para configuración del servidor y de la base de datos. Usar archivo .env.sample de base y renombrar a .env.
+	- Configurar variables de node server:
+			NODE_ENV= development
+			HOST= 127.0.0.1
+			PORT= 3000
+	- Configurar variables de MariaDB server:
+			DB_HOST= 127.0.0.1
+			DB_PORT= 3306
+			DB_USER= root
+			DB_PASS= password
+			DB_DIALECT = mariadb
+			DB_DATABASE = delilah
+	- Cambiar la variable JWT_KEY !
 
 3. INICIAR
 	Iniciar el servidor con el archivo server.js

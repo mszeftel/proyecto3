@@ -391,6 +391,44 @@
 					"response": []
 				},
 				{
+					"name": "Delete order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiIiwiaWF0IjoxNjA3MDAwNDQzLCJleHAiOjE2MDcwMTI0NDN9.V2ZaIUElGkIf-kR7LQHl-vlT9mpARgXlIwR05eDzEo-z2jDPkpetzsZXQqtKLkKGQ2qE4Yca6TJuLRF_Qbxymg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/order/3",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"order",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get all orders",
 					"request": {
 						"auth": {
