@@ -155,6 +155,7 @@ async function getById(orderId) {
 }
 
 async function deleteById(orderId) {
+	//Init transaction as we edit two tables and multiple rows.
 	const tran = await sequelize.transaction();
 	try{
 		const order = await Orders.findOne({
@@ -175,6 +176,7 @@ async function deleteById(orderId) {
 		return true;
 	}
 	catch(err){
+		//If something fails, rollback the tran
 		await tran.rollback();
 
 		console.error(err);

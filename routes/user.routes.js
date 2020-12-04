@@ -74,7 +74,7 @@ module.exports = (app) => {
         res.status(200).send('User updated');
       }
       catch(error){
-        res.status(404).send('Could not udpate user. '+error.message);
+        res.status(404).send('Could not update user. '+error.message);
       }
     }
     else{
